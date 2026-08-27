@@ -20,11 +20,27 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Record current market date
+        run: |
+          python - <<'PY' > /tmp/vol-lab-before
+          import json
+          from pathlib import Path
+          raw = Path("data.js").read_text()
+          print(json.loads(raw.removeprefix("window.VOL_DATA = ").removesuffix(";\n"))["meta"]["asOf"])
+          PY
       - name: Rebuild dashboard dataset
         run: python fetch_data.py
       - name: Commit changed observations
         run: |
-          if git diff --quiet -- data.js; then
+          BEFORE="$(cat /tmp/vol-lab-before)"
+          AFTER="$(python - <<'PY'
+          import json
+          from pathlib import Path
+          raw = Path("data.js").read_text()
+          print(json.loads(raw.removeprefix("window.VOL_DATA = ").removesuffix(";\n"))["meta"]["asOf"])
+          PY
+          )"
+          if [ "$BEFORE" = "$AFTER" ]; then
             echo "No new public observations."
             exit 0
           fi
@@ -33,4 +49,3 @@ jobs:
           git add data.js
           git commit -m "data: refresh public EOD observations"
           git push
-
