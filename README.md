@@ -14,5 +14,4 @@ The dashboard uses official Cboe index histories and public FRED market data. It
 
 ## Data freshness
 
-The current static revision is verified through 2026-08-26. Updating the dashboard requires regenerating `data.js` with `fetch_data.py` and publishing a new revision.
-
+The current revision is verified through 2026-08-26. A scheduled GitHub Actions workflow rebuilds `data.js` from the public sources after each U.S. trading day and republishes the same stable URL when new observations are available.
