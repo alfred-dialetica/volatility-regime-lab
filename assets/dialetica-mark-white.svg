@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Dialetica">
+  <title>Dialetica</title>
+  <path d="M 11.04 72.5 A 45 45 0 0 0 88.96 72.5 A 77.92 77.92 0 0 0 11.04 72.5 Z" fill="#FFFFFF"></path>
+  <path d="M 11.04 72.5 A 45 45 0 0 0 88.96 72.5 A 77.92 77.92 0 0 0 11.04 72.5 Z" fill="#FFFFFF" transform="rotate(120 50 50)"></path>
+  <path d="M 11.04 72.5 A 45 45 0 0 0 88.96 72.5 A 77.92 77.92 0 0 0 11.04 72.5 Z" fill="#FFFFFF" transform="rotate(-120 50 50)"></path>
+</svg>

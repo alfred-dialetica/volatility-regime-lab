@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0B0F13">
+  <title>Volatility regime lab</title>
+  <link rel="icon" href="assets/dialetica-mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <img src="assets/dialetica-mark-white.svg" alt="Dialética">
+        <div>
+          <strong>Volatility lab</strong>
+          <span>Public market research</span>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Dashboard sections">
+        <button class="nav__item is-active" data-view="regime"><span>01</span>Regime</button>
+        <button class="nav__item" data-view="curve"><span>02</span>Term structure</button>
+        <button class="nav__item" data-view="diagnostics"><span>03</span>Diagnostics</button>
+        <button class="nav__item" data-view="dispersion"><span>04</span>Dispersion</button>
+        <button class="nav__item" data-view="methodology"><span>05</span>Methodology</button>
+      </nav>
+
+      <div class="sidebar__foot">
+        <div class="status-line"><i></i><span id="data-status">Loading public EOD data</span></div>
+        <p>Research prototype. Not investment advice.</p>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow">Cross-asset research · public EOD</div>
+          <h1 id="page-title">Volatility regime lab</h1>
+          <p class="lede">A compact view of implied volatility, realized volatility, vol-of-vol and curve shape.</p>
+        </div>
+        <div class="topbar__meta">
+          <span class="source-badge">Cboe + FRED</span>
+          <span class="asof" id="as-of">As of —</span>
+        </div>
+      </header>
+
+      <section class="control-strip" aria-label="Date controls">
+        <div class="segmented" aria-label="History window">
+          <button data-range="63">3M</button>
+          <button data-range="252" class="is-active">1Y</button>
+          <button data-range="756">3Y</button>
+          <button data-range="max">Max</button>
+        </div>
+        <label class="date-control">
+          <span>Time travel</span>
+          <input id="date-slider" type="range" min="0" max="100" value="100">
+          <output id="date-output">—</output>
+        </label>
+        <button class="reset-button" id="reset-date">Latest</button>
+      </section>
+
+      <section class="view is-active" data-view-panel="regime">
+        <div class="kpi-grid" id="kpi-grid"></div>
+
+        <div class="regime-callout" id="regime-callout">
+          <div class="regime-callout__flag"><span>Model read</span><strong id="regime-name">—</strong></div>
+          <p id="regime-copy">Calculating the current regime.</p>
+          <div class="regime-callout__score"><span>Stress score</span><strong id="stress-score">—</strong></div>
+        </div>
+
+        <div class="grid grid--primary">
+          <article class="panel panel--wide">
+            <div class="panel__head">
+              <div><span class="panel__eyebrow">Implied vs. realized</span><h2>Volatility spread</h2></div>
+              <div class="legend"><span class="legend__item legend__item--blue">VIX</span><span class="legend__item legend__item--green">RV21</span></div>
+            </div>
+            <div id="vol-chart" class="chart chart--large" aria-label="VIX and 21-day realized volatility chart"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel__head">
+              <div><span class="panel__eyebrow">Forward expectation</span><h2>Maturity curve</h2></div>
+              <span class="microcopy">vs. 21 sessions prior</span>
+            </div>
+            <div id="curve-chart" class="chart chart--large" aria-label="Volatility maturity curve"></div>
+          </article>
+        </div>
+
+        <div class="grid grid--secondary">
+          <article class="panel">
+            <div class="panel__head"><div><span class="panel__eyebrow">Rolling 3-year rank</span><h2>Regime diagnostics</h2></div></div>
+            <div id="diagnostic-bars" class="diagnostic-bars"></div>
+          </article>
+          <article class="panel">
+            <div class="panel__head"><div><span class="panel__eyebrow">Joint state</span><h2>VIX × VVIX</h2></div><span class="microcopy">1 year</span></div>
+            <div id="scatter-chart" class="chart" aria-label="Scatter plot of VIX versus VVIX"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="view" data-view-panel="curve">
+        <div class="section-intro">
+          <div><span class="eyebrow">Curve anatomy</span><h2>Expectation across horizons</h2></div>
+          <p>Constant-maturity Cboe indices show where near-term event risk departs from the medium-horizon volatility baseline.</p>
+        </div>
+        <div class="grid grid--curve">
+          <article class="panel panel--wide panel--hero-chart">
+            <div id="curve-chart-large" class="chart chart--xlarge"></div>
+          </article>
+          <article class="panel curve-readout" id="curve-readout"></article>
+        </div>
+        <article class="panel panel--full">
+          <div class="panel__head"><div><span class="panel__eyebrow">Monthly average · VIX3M minus VIX</span><h2>Curve state tape</h2></div><div class="heat-legend"><span>Inversion</span><i></i><span>Contango</span></div></div>
+          <div id="curve-heatmap" class="heatmap"></div>
+        </article>
+      </section>
+
+      <section class="view" data-view-panel="diagnostics">
+        <div class="section-intro">
+          <div><span class="eyebrow">Observed shocks</span><h2>Stress tape</h2></div>
+          <p>The largest daily VIX moves in the selected window, paired with contemporaneous S&amp;P 500 returns and curve shape.</p>
+        </div>
+        <article class="panel panel--full table-panel">
+          <table>
+            <thead><tr><th>Date</th><th>Δ VIX</th><th>VIX close</th><th>S&amp;P 500</th><th>VIX3M − VIX</th><th>State</th></tr></thead>
+            <tbody id="event-table"></tbody>
+          </table>
+        </article>
+        <div class="grid grid--secondary">
+          <article class="panel">
+            <div class="panel__head"><div><span class="panel__eyebrow">Volatility of volatility</span><h2>VVIX vs. VIX</h2></div></div>
+            <div id="vvix-chart" class="chart chart--large"></div>
+          </article>
+          <article class="panel">
+            <div class="panel__head"><div><span class="panel__eyebrow">Tail repricing</span><h2>SKEW vs. VIX</h2></div></div>
+            <div id="skew-chart" class="chart chart--large"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="view" data-view-panel="dispersion">
+        <div class="section-intro">
+          <div><span class="eyebrow">Index vs. single names</span><h2>The correlation trade inside volatility</h2></div>
+          <p>A long-dispersion book typically buys constituent variance and sells index variance. Its relative P&amp;L is exposed to realized correlation, relative volatility, skew, events, weights and implementation costs.</p>
+        </div>
+
+        <div class="kpi-grid" id="dispersion-kpis"></div>
+
+        <div class="dispersion-callout" id="dispersion-callout">
+          <div class="dispersion-callout__flag"><span>Market configuration</span><strong id="dispersion-name">—</strong></div>
+          <p id="dispersion-copy">Reading the public implied-dispersion tape.</p>
+          <div class="dispersion-callout__score"><span>Long-dispersion hurdle</span><strong id="dispersion-hurdle">—</strong></div>
+        </div>
+
+        <div class="grid grid--primary">
+          <article class="panel panel--wide">
+            <div class="panel__head">
+              <div><span class="panel__eyebrow">30-day implied volatility</span><h2>Constituents vs. index</h2></div>
+              <div class="legend"><span class="legend__item legend__item--green">VIXEQ</span><span class="legend__item legend__item--blue">VIX</span></div>
+            </div>
+            <div id="constituent-chart" class="chart chart--large" aria-label="Cboe VIXEQ constituent volatility versus VIX index volatility"></div>
+          </article>
+
+          <article class="panel dispersion-bridge" id="dispersion-bridge" aria-label="Variance decomposition"></article>
+        </div>
+
+        <div class="grid grid--secondary">
+          <article class="panel">
+            <div class="panel__head">
+              <div><span class="panel__eyebrow">Normalized at window start</span><h2>DSPX × COR3M</h2></div>
+              <div class="legend"><span class="legend__item legend__item--green">DSPX</span><span class="legend__item legend__item--red">COR3M</span></div>
+            </div>
+            <div id="dispersion-chart" class="chart chart--large" aria-label="Indexed dispersion and implied correlation"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel__head"><div><span class="panel__eyebrow">Expected average correlation</span><h2>Correlation term structure</h2></div><span class="microcopy">Top 50 SPX names</span></div>
+            <div id="correlation-curve" class="chart chart--large" aria-label="Cboe implied correlation term structure"></div>
+          </article>
+        </div>
+
+        <article class="panel panel--full trade-anatomy">
+          <div class="panel__head"><div><span class="panel__eyebrow">Trade translator</span><h2>What the book is actually long and short</h2></div><span class="microcopy">Conceptual · not a position recommendation</span></div>
+          <div class="trade-anatomy__grid">
+            <div><span>01 · Long</span><h3>Single-name variance</h3><p>Buy a weighted basket of constituent options or variance. Idiosyncratic moves, earnings and stock-specific shocks can help.</p></div>
+            <div><span>02 · Short</span><h3>Index variance</h3><p>Sell SPX variance or options against the basket. Common market moves make the index leg expensive when expected correlation is high.</p></div>
+            <div><span>03 · Residual</span><h3>Short correlation</h3><p>The relative book benefits when realized co-movement is lower than the correlation embedded at entry. Correlation spikes are the central crash risk.</p></div>
+          </div>
+          <div class="formula-strip"><span>Portfolio variance</span><strong>σ²<sub>index</sub> = Σw²<sub>i</sub>σ²<sub>i</sub> + Σ<sub>i≠j</sub>w<sub>i</sub>w<sub>j</sub>σ<sub>i</sub>σ<sub>j</sub>ρ<sub>ij</sub></strong><p>Low correlation creates a wider gap between constituent variance and index variance. Cboe DSPX standardizes that expected 30-day gap.</p></div>
+        </article>
+      </section>
+
+      <section class="view" data-view-panel="methodology">
+        <div class="method-grid">
+          <article class="method-lead">
+            <span class="eyebrow">Methodology</span>
+            <h2>Observed measures first. Derived measures labelled.</h2>
+            <p>This prototype uses public end-of-day series. It is designed to explain a volatility regime, not to produce a trading recommendation.</p>
+          </article>
+          <article class="method-card"><span>01 · Observed</span><h3>Cboe indices</h3><p>VIX1D, VIX9D, VIX, VIX3M, VIX6M and VIX1Y define the constant-maturity curve. VVIX and SKEW add vol-of-vol and tail-risk context.</p></article>
+          <article class="method-card"><span>02 · Observed</span><h3>S&amp;P 500 close</h3><p>Daily S&amp;P 500 levels come from FRED. The dashboard does not ingest private positions, order flow or paid option-chain data.</p></article>
+          <article class="method-card"><span>03 · Derived</span><h3>Realized volatility</h3><p>RV21, RV63 and RV252 are annualized standard deviations of daily log returns. The displayed volatility premium is backward-looking.</p></article>
+          <article class="method-card"><span>04 · Derived</span><h3>Regime score</h3><p>A transparent heuristic combines rolling percentiles for VIX, VVIX, SKEW and curve inversion. It is descriptive and intentionally not predictive.</p></article>
+          <article class="method-card"><span>05 · Observed</span><h3>Dispersion and constituent vol</h3><p>DSPX measures expected 30-day S&amp;P 500 dispersion from SPX and selected single-stock options. VIXEQ represents the market-cap-weighted root-mean-square implied volatility of the eligible constituent basket.</p></article>
+          <article class="method-card"><span>06 · Observed</span><h3>Implied correlation</h3><p>COR1M, COR3M, COR6M and COR1Y estimate average expected correlation for the top 50 value-weighted SPX names using ATM index and component option implied volatilities.</p></article>
+          <article class="method-card method-card--sources"><span>Sources</span><h3>Primary public data</h3><p><a href="https://www.cboe.com/us/indices/market_statistics/" target="_blank" rel="noreferrer">Cboe Global Indices</a><br><a href="https://www.cboe.com/us/indices/dispersion/" target="_blank" rel="noreferrer">Cboe · Dispersion</a><br><a href="https://www.cboe.com/us/indices/implied/" target="_blank" rel="noreferrer">Cboe · Implied Correlation</a><br><a href="https://fred.stlouisfed.org/series/SP500" target="_blank" rel="noreferrer">FRED · S&amp;P 500</a></p></article>
+        </div>
+      </section>
+
+      <footer>
+        <span>Dialética research prototype</span>
+        <span id="revision">Revision —</span>
+      </footer>
+    </main>
+  </div>
+  <div id="tooltip" class="tooltip" role="status" aria-live="polite"></div>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
